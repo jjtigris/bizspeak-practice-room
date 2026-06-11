@@ -31,47 +31,41 @@ export default function Home() {
   }
 
   return (
-    <main style={{ padding: 30, maxWidth: 600, margin: '0 auto' }}>
-      <h1>BizSpeak Practice Room</h1>
+    <main>
+      <div className="container">
+        <section className="card">
+          <p className="label">BizSpeak Practice Room</p>
 
-      <h2>{topic.title}</h2>
+          <h1>{topic.title}</h1>
 
-      <p>{topic.context}</p>
+          <p>{topic.context}</p>
 
-      {topic.video_url && (
-        <div style={{ marginTop: 20 }}>
-          <iframe
-            width="100%"
-            height="315"
-            src={topic.video_url}
-            title="Weekly business video"
-            allowFullScreen
-            style={{
-              border: 'none',
-              borderRadius: 12
-            }}
-          />
-        </div>
-      )}
+          {topic.video_url && (
+            <iframe
+              className="video"
+              src={topic.video_url}
+              title="Weekly business video"
+              allowFullScreen
+            />
+          )}
 
-      <h3>After watching, speak for 3–5 minutes:</h3>
+          <h2>After watching, speak for 3–5 minutes:</h2>
 
-      <ol>
-        {topic.questions?.map((question, index) => (
-          <li key={index}>{question}</li>
-        ))}
-      </ol>
+          <ol>
+            {topic.questions?.map((question, index) => (
+              <li key={index}>{question}</li>
+            ))}
+          </ol>
 
-      <Link href={`/record?topicId=${topic.id}`}>
-        Start Recording →
-      </Link>
+          <Link className="button" href={`/record?topicId=${topic.id}`}>
+            Start Recording
+          </Link>
 
-      <br />
-      <br />
-
-      <Link href="/history">
-        View Practice History →
-      </Link>
+          <Link className="secondary" href="/history">
+            View Practice History
+          </Link>
+        </section>
+      </div>
     </main>
-  )
+)
 }

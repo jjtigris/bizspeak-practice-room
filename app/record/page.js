@@ -6,13 +6,9 @@ import { supabase } from '../../lib/supabase'
 
 export default function RecordPage() {
   const router = useRouter()
-    const [topicId, setTopicId] = useState('')
 
-    useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    setTopicId(params.get('topicId'))
-    }, [])
-
+  const [topicId, setTopicId] = useState('')
+  const [userName, setUserName] = useState('')
   const [recording, setRecording] = useState(false)
   const [audioUrl, setAudioUrl] = useState(null)
   const [audioBlob, setAudioBlob] = useState(null)
@@ -21,41 +17,54 @@ export default function RecordPage() {
   const [seconds, setSeconds] = useState(0)
   const [timer, setTimer] = useState(null)
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    setTopicId(params.get('topicId') || '')
+  }, [])
+
   async function startRecording() {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      audio: true
-    })
-
-    const recorder = new MediaRecorder(stream)
-    let chunks = []
-
-    recorder.ondataavailable = e => {
-      chunks.push(e.data)
-    }
-
-    recorder.onstop = () => {
-      const blob = new Blob(chunks, {
-        type: 'audio/webm'
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true
       })
 
-      const url = URL.createObjectURL(blob)
+      const recorder = new MediaRecorder(stream)
+      const chunks = []
 
-      setAudioBlob(blob)
-      setAudioUrl(url)
+      recorder.ondataavailable = event => {
+        if (event.data.size > 0) {
+          chunks.push(event.data)
+        }
+      }
 
-      stream.getTracks().forEach(track => track.stop())
+      recorder.onstop = () => {
+        const blob = new Blob(chunks, {
+          type: 'audio/webm'
+        })
+
+        const url = URL.createObjectURL(blob)
+
+        setAudioBlob(blob)
+        setAudioUrl(url)
+
+        stream.getTracks().forEach(track => track.stop())
+      }
+
+      recorder.start()
+
+      setMediaRecorder(recorder)
+      setRecording(true)
+      setSeconds(0)
+
+      const interval = setInterval(() => {
+        setSeconds(prev => prev + 1)
+      }, 1000)
+
+      setTimer(interval)
+    } catch (error) {
+      console.error(error)
+      alert('Microphone access failed. Please allow microphone permission.')
     }
-
-    recorder.start()
-    setMediaRecorder(recorder)
-    setRecording(true)
-    setSeconds(0)
-
-    const interval = setInterval(() => {
-      setSeconds(prev => prev + 1)
-    }, 1000)
-
-    setTimer(interval)
   }
 
   function stopRecording() {
@@ -71,6 +80,11 @@ export default function RecordPage() {
   }
 
   async function uploadRecording() {
+    if (!topicId) {
+      alert('Missing topic ID. Please go back to the home page and try again.')
+      return
+    }
+
     if (!audioBlob) {
       alert('Please record first.')
       return
@@ -100,7 +114,8 @@ export default function RecordPage() {
         .insert({
           topic_id: topicId,
           audio_url: publicUrl,
-          duration_seconds: seconds
+          duration_seconds: seconds,
+          user_name: userName || 'Anonymous'
         })
         .select()
         .single()
@@ -112,36 +127,33 @@ export default function RecordPage() {
       const feedbackResult = await supabase
         .from('feedback')
         .insert({
-            submission_id: insertResult.data.id,
-            fluency: 7,
-            clarity: 8,
-            structure: 7,
-            vocabulary: 7,
-            confidence: 6,
-            overall_comment:
+          submission_id: insertResult.data.id,
+          fluency: 7,
+          clarity: 8,
+          structure: 7,
+          vocabulary: 7,
+          confidence: 6,
+          overall_comment:
             'Good job. Your answer is clear and business-focused. The next step is to sound more natural and less translated from Chinese.',
-            strengths: [
+          strengths: [
             'You explained the business topic clearly.',
             'You stayed focused on the main idea.',
             'You used some useful business vocabulary.'
-            ],
-            improvements: [
+          ],
+          improvements: [
             'Use more structure words like first, second, finally.',
             'Reduce repeated phrases such as “I think”.',
             'Add one concrete example from your own work.'
-            ],
-            better_answer:
+          ],
+          better_answer:
             'AI may change middle management by reducing repetitive reporting work and increasing the importance of communication, judgment, and team coaching. In my work, this could help managers make faster decisions, but people still need to check the quality of AI output.',
-            next_focus:
+          next_focus:
             'Next time, focus on giving your answer in a clear three-part structure.'
         })
 
-        if (feedbackResult.error) {
+      if (feedbackResult.error) {
         throw feedbackResult.error
-        }
-
-      
-
+      }
 
       router.push(`/feedback/${insertResult.data.id}`)
     } catch (error) {
@@ -150,48 +162,56 @@ export default function RecordPage() {
     } finally {
       setUploading(false)
     }
-    
   }
 
-  
-
   return (
-    <main style={{ padding: 30 }}>
-      <h1>Record Your Summary</h1>
+    <main>
+      <div className="container">
+        <section className="card">
+          <p className="label">Speaking Practice</p>
 
-      <p>Topic ID: {topicId}</p>
+          <h1>Record Your Summary</h1>
 
-      <p>Duration: {seconds} seconds</p>
+          <input
+            className="input"
+            placeholder="Your name"
+            value={userName}
+            onChange={event => setUserName(event.target.value)}
+          />
 
-      {!recording && (
-        <button onClick={startRecording}>
-          Start Recording
-        </button>
-      )}
+          <p>Duration: {seconds} seconds</p>
 
-      {recording && (
-        <button onClick={stopRecording}>
-          Stop Recording
-        </button>
-      )}
+          {!recording && (
+            <button className="button" onClick={startRecording}>
+              Start Recording
+            </button>
+          )}
 
-      {audioUrl && (
-        <>
-          <h3>Preview</h3>
+          {recording && (
+            <button className="danger" onClick={stopRecording}>
+              Stop Recording
+            </button>
+          )}
 
-          <audio controls src={audioUrl} />
+          {audioUrl && (
+            <>
+              <h2>Preview</h2>
 
-          <br />
-          <br />
+              <audio className="audio" controls src={audioUrl} />
 
-          <button
-            onClick={uploadRecording}
-            disabled={uploading}
-          >
-            {uploading ? 'Uploading...' : 'Upload Recording'}
-          </button>
-        </>
-      )}
+              <button
+                className="button"
+                onClick={uploadRecording}
+                disabled={uploading}
+              >
+                {uploading
+                  ? 'Uploading and generating feedback...'
+                  : 'Submit for Feedback'}
+              </button>
+            </>
+          )}
+        </section>
+      </div>
     </main>
   )
 }
