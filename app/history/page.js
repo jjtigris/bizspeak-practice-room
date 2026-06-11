@@ -6,50 +6,95 @@ import { supabase } from '../../lib/supabase'
 
 export default function HistoryPage() {
   const [items, setItems] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [userCode, setUserCode] = useState('')
 
   useEffect(() => {
     loadHistory()
   }, [])
 
   async function loadHistory() {
+    const savedCode = localStorage.getItem('bizspeak_user_code')
+
+    if (!savedCode) {
+      setLoading(false)
+      return
+    }
+
+    setUserCode(savedCode)
+
     const { data, error } = await supabase
       .from('submissions')
       .select('*')
+      .eq('user_code', savedCode)
       .order('created_at', { ascending: false })
 
     if (error) {
       console.error(error)
+      setLoading(false)
       return
     }
 
-    setItems(data)
+    setItems(data || [])
+    setLoading(false)
   }
 
   return (
-    <main style={{ padding: 30, maxWidth: 600, margin: '0 auto' }}>
-      <h1>Practice History</h1>
+    <main>
+      <div className="container">
+        <section className="card">
+          <p className="label">Your Practice History</p>
 
-      {items.length === 0 && <p>No recordings yet.</p>}
+          <h1>Practice History</h1>
 
-      {items.map(item => (
-        <Link
-          key={item.id}
-          href={`/feedback/${item.id}`}
-          style={{
-            display: 'block',
-            padding: 16,
-            marginBottom: 12,
-            border: '1px solid #ddd',
-            borderRadius: 12,
-            textDecoration: 'none',
-            color: '#111'
-          }}
-        >
-          <strong>Recording</strong>
-          <p>Duration: {item.duration_seconds} seconds</p>
-          <p>{new Date(item.created_at).toLocaleString()}</p>
-        </Link>
-      ))}
+          {loading && <p>Loading...</p>}
+
+          {!loading && !userCode && (
+            <p>
+              No access code found.
+              Please complete a practice session first.
+            </p>
+          )}
+
+          {!loading && userCode && (
+            <>
+              <p>
+                Access Code: <strong>{userCode}</strong>
+              </p>
+
+              {items.length === 0 && (
+                <p>No recordings found yet.</p>
+              )}
+
+              {items.map(item => (
+                <Link
+                  key={item.id}
+                  href={`/feedback/${item.id}`}
+                  className="history-item"
+                >
+                  <strong>
+                    {item.user_name || 'Anonymous'}
+                  </strong>
+
+                  <p>
+                    Duration: {item.duration_seconds} seconds
+                  </p>
+
+                  <p>
+                    {new Date(
+                      item.created_at
+                    ).toLocaleString()}
+                  </p>
+                </Link>
+              ))}
+            </>
+          )}
+
+          <Link className="button" href="/">
+            Back to Practice
+          </Link>
+        </section>
+      </div>
     </main>
   )
 }

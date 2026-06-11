@@ -6,28 +6,60 @@ import { supabase } from '../lib/supabase'
 
 export default function Home() {
   const [topic, setTopic] = useState(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     loadTopic()
   }, [])
 
   async function loadTopic() {
+    const today = new Date().toISOString().slice(0, 10)
+
     const { data, error } = await supabase
       .from('weekly_topics')
       .select('*')
       .eq('status', 'active')
-      .single()
+      .eq('practice_day', 1)
+      .maybeSingle()
 
     if (error) {
       console.error(error)
-      return
     }
 
     setTopic(data)
+    setLoading(false)
+  }
+
+  if (loading) {
+    return (
+      <main>
+        <div className="container">
+          <section className="card">
+            <h1>Loading...</h1>
+          </section>
+        </div>
+      </main>
+    )
   }
 
   if (!topic) {
-    return <main style={{ padding: 30 }}>Loading...</main>
+    return (
+      <main>
+        <div className="container">
+          <section className="card">
+            <h1>No Practice Available Today</h1>
+
+            <p>
+              There is currently no active video scheduled for today.
+            </p>
+
+            <Link className="secondary" href="/history">
+              View Practice History
+            </Link>
+          </section>
+        </div>
+      </main>
+    )
   }
 
   return (
@@ -44,7 +76,7 @@ export default function Home() {
             <iframe
               className="video"
               src={topic.video_url}
-              title="Weekly business video"
+              title="Daily Practice Video"
               allowFullScreen
             />
           )}
@@ -57,7 +89,10 @@ export default function Home() {
             ))}
           </ol>
 
-          <Link className="button" href={`/record?topicId=${topic.id}`}>
+          <Link
+            className="button"
+            href={`/record?topicId=${topic.id}`}
+          >
             Start Recording
           </Link>
 
@@ -67,5 +102,5 @@ export default function Home() {
         </section>
       </div>
     </main>
-)
+  )
 }

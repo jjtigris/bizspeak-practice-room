@@ -9,6 +9,7 @@ export default function RecordPage() {
 
   const [topicId, setTopicId] = useState('')
   const [userName, setUserName] = useState('')
+  const [userCode, setUserCode] = useState('')
   const [recording, setRecording] = useState(false)
   const [audioUrl, setAudioUrl] = useState(null)
   const [audioBlob, setAudioBlob] = useState(null)
@@ -20,6 +21,16 @@ export default function RecordPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     setTopicId(params.get('topicId') || '')
+
+    const savedCode = localStorage.getItem('bizspeak_user_code')
+    if (savedCode) {
+      setUserCode(savedCode)
+    }
+
+    const savedName = localStorage.getItem('bizspeak_user_name')
+    if (savedName) {
+      setUserName(savedName)
+    }
   }, [])
 
   async function startRecording() {
@@ -83,11 +94,16 @@ export default function RecordPage() {
     setAudioBlob(null)
     setAudioUrl(null)
     setSeconds(0)
-    }
+  }
 
   async function uploadRecording() {
     if (!topicId) {
       alert('Missing topic ID. Please go back to the home page and try again.')
+      return
+    }
+
+    if (!userCode.trim()) {
+      alert('Please enter your access code.')
       return
     }
 
@@ -96,10 +112,13 @@ export default function RecordPage() {
       return
     }
 
+    localStorage.setItem('bizspeak_user_code', userCode.trim())
+    localStorage.setItem('bizspeak_user_name', userName.trim())
+
     setUploading(true)
 
     try {
-      const fileName = `${topicId}-${Date.now()}.webm`
+      const fileName = `${userCode.trim()}-${topicId}-${Date.now()}.webm`
 
       const uploadResult = await supabase.storage
         .from('recordings')
@@ -121,7 +140,8 @@ export default function RecordPage() {
           topic_id: topicId,
           audio_url: publicUrl,
           duration_seconds: seconds,
-          user_name: userName || 'Anonymous'
+          user_name: userName.trim() || 'Anonymous',
+          user_code: userCode.trim()
         })
         .select()
         .single()
@@ -182,7 +202,20 @@ export default function RecordPage() {
             className="input"
             placeholder="Your name"
             value={userName}
-            onChange={event => setUserName(event.target.value)}
+            onChange={event => {
+              setUserName(event.target.value)
+              localStorage.setItem('bizspeak_user_name', event.target.value)
+            }}
+          />
+
+          <input
+            className="input"
+            placeholder="Your access code"
+            value={userCode}
+            onChange={event => {
+              setUserCode(event.target.value)
+              localStorage.setItem('bizspeak_user_code', event.target.value)
+            }}
           />
 
           <p>Duration: {seconds} seconds</p>
@@ -199,24 +232,21 @@ export default function RecordPage() {
             </button>
           )}
 
-        {audioUrl && (
-        <>
-            <h2>Preview</h2>
+          {audioUrl && (
+            <>
+              <h2>Preview</h2>
 
-            <audio className="audio" controls src={audioUrl} />
+              <audio className="audio" controls src={audioUrl} />
 
-            <button
-            className="secondary"
-            onClick={resetRecording}
-            >
-            Re-record
-            </button>
+              <button className="secondary" onClick={resetRecording}>
+                Re-record
+              </button>
 
-            <button
-            className="button"
-            onClick={uploadRecording}
-            disabled={uploading}
-            >
+              <button
+                className="button"
+                onClick={uploadRecording}
+                disabled={uploading}
+              >
                 {uploading
                   ? 'Uploading and generating feedback...'
                   : 'Get Coaching'}
