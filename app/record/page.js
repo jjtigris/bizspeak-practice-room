@@ -79,6 +79,12 @@ export default function RecordPage() {
     setRecording(false)
   }
 
+  function resetRecording() {
+    setAudioBlob(null)
+    setAudioUrl(null)
+    setSeconds(0)
+    }
+
   async function uploadRecording() {
     if (!topicId) {
       alert('Missing topic ID. Please go back to the home page and try again.')
@@ -183,7 +189,7 @@ export default function RecordPage() {
 
           {!recording && (
             <button className="button" onClick={startRecording}>
-              Start Recording
+              Start Speaking
             </button>
           )}
 
@@ -193,20 +199,27 @@ export default function RecordPage() {
             </button>
           )}
 
-          {audioUrl && (
-            <>
-              <h2>Preview</h2>
+        {audioUrl && (
+        <>
+            <h2>Preview</h2>
 
-              <audio className="audio" controls src={audioUrl} />
+            <audio className="audio" controls src={audioUrl} />
 
-              <button
-                className="button"
-                onClick={uploadRecording}
-                disabled={uploading}
-              >
+            <button
+            className="secondary"
+            onClick={resetRecording}
+            >
+            Re-record
+            </button>
+
+            <button
+            className="button"
+            onClick={uploadRecording}
+            disabled={uploading}
+            >
                 {uploading
                   ? 'Uploading and generating feedback...'
-                  : 'Submit for Feedback'}
+                  : 'Get Coaching'}
               </button>
             </>
           )}
