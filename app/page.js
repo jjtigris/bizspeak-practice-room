@@ -99,6 +99,7 @@ export default function Home() {
           <Link className="secondary" href="/history">
             View Practice History
           </Link>
+
         </section>
       </div>
     </main>

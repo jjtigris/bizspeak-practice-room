@@ -1,0 +1,46 @@
+
+     
+const feedbackResult = await supabase
+        .from('feedback')
+        .insert({
+          submission_id: insertResult.data.id,
+          fluency: 7,
+          clarity: 8,
+          structure: 7,
+          vocabulary: 7,
+          confidence: 6,
+          overall_comment:
+            'Good job. Your answer is clear and business-focused. The next step is to sound more natural and less translated from Chinese.',
+          strengths: [
+            'You explained the business topic clearly.',
+            'You stayed focused on the main idea.',
+            'You used some useful business vocabulary.'
+          ],
+          improvements: [
+            'Use more structure words like first, second, finally.',
+            'Reduce repeated phrases such as “I think”.',
+            'Add one concrete example from your own work.'
+          ],
+          better_answer:
+            'AI may change middle management by reducing repetitive reporting work and increasing the importance of communication, judgment, and team coaching. In my work, this could help managers make faster decisions, but people still need to check the quality of AI output.',
+          next_focus:
+            'Next time, focus on giving your answer in a clear three-part structure.'
+        })
+
+      if (feedbackResult.error) {
+        throw feedbackResult.error
+      }
+
+
+
+router.push(`/feedback/${insertResult.data.id}`)
+
+
+
+
+          <Link
+          className="secondary"
+          href="/dashboard"
+        >
+          View Progress Dashboard
+        </Link>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
+import Link from 'next/link'
 import { supabase } from '../../../lib/supabase'
 
 export default function FeedbackPage() {
@@ -9,73 +10,99 @@ export default function FeedbackPage() {
   const id = params.id
 
   const [submission, setSubmission] = useState(null)
-  const [feedback, setFeedback] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (id) {
-      loadData()
+      loadSubmission()
     }
   }, [id])
 
-  async function loadData() {
-    const submissionResult = await supabase
+  async function loadSubmission() {
+    const { data, error } = await supabase
       .from('submissions')
       .select('*')
       .eq('id', id)
       .single()
 
-    const feedbackResult = await supabase
-      .from('feedback')
-      .select('*')
-      .eq('submission_id', id)
-      .single()
+    if (error) {
+      console.error(error)
+      setLoading(false)
+      return
+    }
 
-    setSubmission(submissionResult.data)
-    setFeedback(feedbackResult.data)
+    setSubmission(data)
     setLoading(false)
   }
 
   if (loading) {
-    return <main style={{ padding: 30 }}>Loading...</main>
+    return (
+      <main>
+        <div className="container">
+          <section className="card">
+            <h1>Loading...</h1>
+          </section>
+        </div>
+      </main>
+    )
+  }
+
+  if (!submission) {
+    return (
+      <main>
+        <div className="container">
+          <section className="card">
+            <h1>Recording Not Found</h1>
+
+            <Link className="button" href="/history">
+              Back to History
+            </Link>
+          </section>
+        </div>
+      </main>
+    )
   }
 
   return (
-    <main style={{ padding: 30, maxWidth: 600, margin: '0 auto' }}>
-      <h1>AI Feedback</h1>
+    <main>
+      <div className="container">
+        <section className="card">
+          <p className="label">Practice Submitted</p>
 
-      <audio controls src={submission.audio_url} style={{ width: '100%' }} />
+          <h1>Recording Saved ✅</h1>
 
-      <h2>Scores</h2>
+          <p>
+            Name: <strong>{submission.user_name || 'Anonymous'}</strong>
+          </p>
 
-      <p>Fluency: {feedback.fluency}/10</p>
-      <p>Clarity: {feedback.clarity}/10</p>
-      <p>Structure: {feedback.structure}/10</p>
-      <p>Vocabulary: {feedback.vocabulary}/10</p>
-      <p>Confidence: {feedback.confidence}/10</p>
+          <p>
+            Duration: {submission.duration_seconds} seconds
+          </p>
 
-      <h2>Overall</h2>
-      <p>{feedback.overall_comment}</p>
+          <p>
+            Submitted:{' '}
+            {new Date(submission.created_at).toLocaleString()}
+          </p>
 
-      <h2>Strengths</h2>
-      <ul>
-        {feedback.strengths?.map((item, index) => (
-          <li key={index}>{item}</li>
-        ))}
-      </ul>
+          <audio
+            className="audio"
+            controls
+            src={submission.audio_url}
+          />
 
-      <h2>Improvements</h2>
-      <ul>
-        {feedback.improvements?.map((item, index) => (
-          <li key={index}>{item}</li>
-        ))}
-      </ul>
+          <p>
+            Your recording has been saved. Feedback will be discussed during the weekly session.
+          </p>
 
-      <h2>Better Version</h2>
-      <p>{feedback.better_answer}</p>
+          <Link className="button" href="/">
+            Back to Today’s Practice
+          </Link>
 
-      <h2>Next Focus</h2>
-      <p>{feedback.next_focus}</p>
+          <Link className="secondary" href="/history">
+            View History
+          </Link>
+        </section>
+      </div>
     </main>
   )
 }
