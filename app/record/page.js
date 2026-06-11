@@ -1,14 +1,17 @@
 'use client'
 
-import { useSearchParams, useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 
 export default function RecordPage() {
-  const searchParams = useSearchParams()
   const router = useRouter()
+    const [topicId, setTopicId] = useState('')
 
-  const topicId = searchParams.get('topicId')
+    useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    setTopicId(params.get('topicId'))
+    }, [])
 
   const [recording, setRecording] = useState(false)
   const [audioUrl, setAudioUrl] = useState(null)
