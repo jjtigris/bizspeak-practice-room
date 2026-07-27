@@ -1,0 +1,381 @@
+# BizSpeak Practice Room – MVP Project Summary
+
+## Vision
+
+BizSpeak Practice Room is a daily English speaking habit platform for Chinese professionals (30–40 years old) who have strong reading/writing skills but weak speaking confidence.
+
+The goal is not to teach English grammar.
+
+The goal is to build a consistent speaking habit through:
+
+* Curated videos
+* Daily spoken summaries
+* Accountability
+* Community discussion
+* Visible progress
+
+We are validating whether busy professionals will consistently:
+
+Watch → Speak → Submit → Return Tomorrow
+
+before investing heavily in AI.
+
+---
+
+# Target Audience
+
+Chinese professionals aged 30–40:
+
+* Managers
+* E-commerce operators
+* Manufacturers
+* Export/import professionals
+* Parents with international exposure
+
+Common characteristics:
+
+* Strong reading/writing
+* Weak speaking/listening
+* Fear of mistakes
+* Translation mindset
+* Limited time
+* Want career ROI
+
+---
+
+# Current Tech Stack
+
+Frontend:
+
+* Next.js
+
+Hosting:
+
+* Vercel
+
+Database:
+
+* Supabase
+
+File Storage:
+
+* Supabase Storage
+
+Authentication:
+
+* None (MVP)
+
+AI:
+
+* None (intentionally postponed)
+
+---
+
+# Current MVP Flow
+
+User opens BizSpeak Practice Room
+
+↓
+
+Watch today's video
+
+↓
+
+Review speaking prompts
+
+↓
+
+Record spoken summary
+
+↓
+
+Replay recording
+
+↓
+
+Re-record if needed
+
+↓
+
+Upload recording
+
+↓
+
+Submission saved
+
+↓
+
+View history
+
+↓
+
+Track progress
+
+↓
+
+Attend weekly discussion
+
+---
+
+# Current Features Completed
+
+## Home Page
+
+Displays:
+
+* Topic title
+* Topic description
+* Embedded YouTube video
+* Discussion questions
+* Start Recording button
+* History button
+* Dashboard button
+
+---
+
+## Video Practice System
+
+Current structure:
+
+Day 1 – Turning Stress into an Advantage
+
+Day 2 – Understanding Global Risks
+
+Day 3 – Building Better Habits
+
+Day 4 – Managing Anxiety in Modern Life
+
+Day 5 – Critical Thinking and Extraordinary Claims
+
+Stored in:
+
+weekly_topics
+
+Fields:
+
+* title
+* context
+* video_url
+* questions
+* practice_day
+* status
+
+---
+
+## Recording System
+
+Users can:
+
+* Start recording
+* Stop recording
+* Listen to playback
+* Delete recording
+* Re-record unlimited times
+
+This is important because users often dislike their first attempt.
+
+---
+
+## User Name Capture
+
+Before upload:
+
+Users enter their name.
+
+Stored as:
+
+submissions.user_name
+
+---
+
+## Upload System
+
+Audio files stored in:
+
+Supabase Storage
+
+Bucket:
+
+recordings
+
+Metadata stored in:
+
+submissions
+
+Fields include:
+
+* id
+* topic_id
+* user_name
+* audio_url
+* duration_seconds
+* created_at
+
+---
+
+## History Page
+
+Users can view:
+
+* Previous recordings
+* Duration
+* Submission time
+
+History currently filtered using:
+
+localStorage user code
+
+Users only see their own recordings.
+
+---
+
+## Recording Detail Page
+
+Users can:
+
+* Play recording
+* See submission details
+* Review practice history
+
+No AI feedback is displayed.
+
+---
+
+## Dashboard
+
+Current dashboard includes:
+
+* Total practices completed
+* Total speaking time
+* Last practice date
+* Simple streak
+* Discussion reminder
+
+Purpose:
+
+Help users feel progress.
+
+---
+
+# Deliberate MVP Decision
+
+AI feedback has been removed.
+
+Reason:
+
+The biggest risk is not AI quality.
+
+The biggest risk is whether users return consistently.
+
+Current focus:
+
+Habit formation.
+
+The weekly discussion session provides feedback manually.
+
+---
+
+# Product Philosophy
+
+People do not buy AI.
+
+People buy:
+
+* Confidence
+* Accountability
+* Progress
+* Community
+* Consistency
+
+The discussion session may become more valuable than AI.
+
+---
+
+# Current Validation Goal
+
+We are not validating AI.
+
+We are validating:
+
+Can 7 professionals complete a 5-day speaking challenge and attend discussion sessions?
+
+Success metric:
+
+* Daily recording completion
+* Repeat usage
+* Discussion attendance
+* User engagement
+
+---
+
+# Next Development Priorities
+
+Priority 1:
+
+Admin Dashboard
+
+Track:
+
+* Who practiced today
+* Who missed today
+* Who completed all 5 days
+* Completion rate
+
+---
+
+Priority 2:
+
+Discussion Attendance Tracking
+
+Status:
+
+* Attended
+* Missed
+* Makeup completed
+
+---
+
+Priority 3:
+
+Real Streak Logic
+
+Track actual consecutive days.
+
+---
+
+Priority 4:
+
+Simple Authentication
+
+Possibly:
+
+* Email login
+* Invite code
+
+---
+
+Priority 5:
+
+Real AI Feedback
+
+Only after user retention is proven.
+
+Potential future stack:
+
+Audio → Speech-to-Text → AI Feedback
+
+---
+
+# MVP Success Definition
+
+A successful MVP is NOT:
+
+"AI gives amazing feedback."
+
+A successful MVP is:
+
+"Users consistently return, practice speaking, and engage in discussions."
+
+If users build a habit, AI can be added later.
+
+If users do not build a habit, AI will not solve the problem.

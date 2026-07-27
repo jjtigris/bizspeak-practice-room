@@ -19,7 +19,7 @@ export default function Home() {
       .from('weekly_topics')
       .select('*')
       .eq('status', 'active')
-      .eq('practice_day', 1)
+      .eq('practice_day', 2)
       .maybeSingle()
 
     if (error) {
